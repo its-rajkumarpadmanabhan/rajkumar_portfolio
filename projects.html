@@ -510,12 +510,11 @@
 <header class="page-head">
   <div class="section-label">github.com/its-rajkumarpadmanabhan</div>
   <h1>All Projects</h1>
-  <p>Every public repository, pulled live from GitHub — not just the highlights. Search, filter by language, and sort by whatever matters to you.</p>
+  <p>A hand-picked list of my projects. Search, filter by language, and sort by whatever matters to you.</p>
 
   <div class="gh-stats" id="ghStats">
     <div class="gh-stat"><div class="num" id="statRepos">—</div><div class="label">Repositories</div></div>
-    <div class="gh-stat"><div class="num" id="statStars">—</div><div class="label">Total Stars</div></div>
-    <div class="gh-stat"><div class="num" id="statFollowers">—</div><div class="label">Followers</div></div>
+    <div class="gh-stat"><div class="num">100+</div><div class="label">Profile Views</div></div>
     <div class="gh-stat"><div class="num" id="statLangs">—</div><div class="label">Languages</div></div>
   </div>
 </header>
@@ -536,14 +535,7 @@
 </div>
 
 <section class="projects-wrap">
-  <div class="projects-grid" id="projectsGrid">
-    <div class="skeleton"></div>
-    <div class="skeleton"></div>
-    <div class="skeleton"></div>
-    <div class="skeleton"></div>
-    <div class="skeleton"></div>
-    <div class="skeleton"></div>
-  </div>
+  <div class="projects-grid" id="projectsGrid"></div>
   <div class="state-msg" id="stateMsg" style="display:none;"></div>
 </section>
 
@@ -555,6 +547,79 @@
 <script>
 (function () {
   var GH_USER = 'its-rajkumarpadmanabhan';
+
+  /* ---------- MANUAL PROJECT LIST ----------
+     Add more projects by copying an object below and editing its fields.
+     Only "name" and "html_url" are required — everything else can be
+     left as shown (empty string / 0 / false) if you don't have a value yet.
+
+     name              -> repo name, shown as the card title
+     description        -> shown as the card blurb
+     language           -> e.g. "Python", "JavaScript" (used for the colored dot + filter)
+     topics              -> array of short tags shown on the card, e.g. ["flask","sqlite"]
+     html_url            -> link behind the "Code" button (usually the GitHub repo URL)
+     homepage           -> link behind the "Live" button; leave "" to hide that button
+     stargazers_count -> number shown next to the star icon
+     forks_count        -> number shown next to the fork icon
+     fork                  -> true/false, shows a "Fork" badge on the card
+     pushed_at           -> date string, used for "Recently updated" sorting
+     created_at          -> date string, used for "Newest first" sorting
+  --------------------------------------------- */
+  var MANUAL_REPOS = [
+    {
+      name: 'Netflix Clone – Full Stack Web Application',
+      description: "Developed a Netflix-inspired movie streaming platform that enables users to discover, browse, and stream movies, TV shows, and documentaries through a modern and responsive interface. The application provides secure authentication, separate user experiences for kids and adults, and seamless video playback. Built using full-stack web technologies, the platform efficiently manages user data and streaming content while delivering an engaging viewing experience.",
+      language: 'Python',
+      topics: ['HTML5', 'CSS3', 'JavaScript', 'Bootstrap', 'Django', 'SQLite', 'MySQL'],
+      html_url: 'https://github.com/its-rajkumarpadmanabhan/Netflix_Clone.git',
+      homepage: '',
+      stargazers_count: 0,
+      forks_count: 0,
+      fork: false,
+      pushed_at: '2026-01-01',
+      created_at: '2025-01-01'
+    },
+    {
+      name: 'Shopify-Inspired E-Commerce Platform (Amazon-Style)',
+      description: "Developed a Shopify-inspired e-commerce platform using Python and Django, modeled after Amazon's online shopping experience. The application provides a secure authentication system where only registered users can access the platform. Sellers can manage product listings, while buyers can browse products, add items to their cart, manage purchases, and complete the checkout process through an intuitive and user-friendly interface.",
+      language: 'Python',
+      topics: ['HTML5', 'CSS3', 'JavaScript', 'Bootstrap', 'Django', 'SQLite', 'MySQL'],
+      html_url: 'https://github.com/its-rajkumarpadmanabhan/shopify.git',
+      homepage: '',
+      stargazers_count: 0,
+      forks_count: 0,
+      fork: false,
+      pushed_at: '2026-01-01',
+      created_at: '2025-01-01'
+    },
+     {
+      name: 'Job Radar AI',
+      description: "A Python-based job monitoring platform that helps job seekers discover and track vacancies in real time.The application automatically updates new job postings, stores job history, marks visited positions, and provides direct links to application pages for a streamlined job search experience.",
+      language: 'Python',
+      topics: ['HTML5', 'CSS3', 'JavaScript', 'Bootstrap'],
+      html_url: 'https://github.com/its-rajkumarpadmanabhan/JobSeekers_Ai.git',
+      homepage: '',
+      stargazers_count: 0,
+      forks_count: 0,
+      fork: false,
+      pushed_at: '2026-01-01',
+      created_at: '2025-01-01'
+    },
+
+    /* ,{
+      name: 'another-repo-name',
+      description: "Describe it here.",
+      language: 'JavaScript',
+      topics: ['tag1', 'tag2'],
+      html_url: 'https://github.com/' + GH_USER + '/another-repo-name',
+      homepage: '',
+      stargazers_count: 0,
+      forks_count: 0,
+      fork: false,
+      pushed_at: '2026-01-01',
+      created_at: '2025-01-01'
+    } */
+  ];
 
   /* ---------- THEME TOGGLE (shared with main portfolio) ---------- */
   var root = document.documentElement;
@@ -717,55 +782,20 @@
     document.getElementById('statLangs').textContent = sortedLangs.length;
   }
 
-  async function loadProfile() {
-    try {
-      var res = await fetch('https://api.github.com/users/' + GH_USER);
-      if (!res.ok) return;
-      var data = await res.json();
-      document.getElementById('statRepos').textContent = data.public_repos != null ? data.public_repos : '—';
-      document.getElementById('statFollowers').textContent = data.followers != null ? data.followers : '—';
-    } catch (e) { /* stats are non-critical */ }
-  }
+  function loadRepos() {
+    var results = MANUAL_REPOS.slice();
 
-  async function loadRepos() {
-    try {
-      var page = 1, results = [];
-      while (true) {
-        var res = await fetch('https://api.github.com/users/' + GH_USER + '/repos?per_page=100&page=' + page + '&sort=updated');
-        if (!res.ok) {
-          if (res.status === 403) throw new Error('rate-limited');
-          throw new Error('http-' + res.status);
-        }
-        var batch = await res.json();
-        results = results.concat(batch);
-        if (batch.length < 100) break;
-        page++;
-        if (page > 5) break;
-      }
+    allRepos = results;
+    document.getElementById('statRepos').textContent = results.length;
 
-      allRepos = results;
-      var totalStars = results.reduce(function (sum, r) { return sum + r.stargazers_count; }, 0);
-      document.getElementById('statStars').textContent = totalStars;
-      document.getElementById('statRepos').textContent = results.length;
-
-      populateLangFilter(results);
-      applyFiltersAndRender();
-    } catch (err) {
-      grid.innerHTML = '';
-      stateMsg.style.display = 'block';
-      var msg = err.message === 'rate-limited'
-        ? 'GitHub\u2019s public API rate limit was hit loading these repos live.'
-        : 'Couldn\u2019t load repositories right now.';
-      stateMsg.innerHTML = msg + ' You can browse everything directly on <a href="https://github.com/' + GH_USER + '?tab=repositories" target="_blank" rel="noopener noreferrer">GitHub</a> instead.';
-      resultCount.textContent = '';
-    }
+    populateLangFilter(results);
+    applyFiltersAndRender();
   }
 
   searchInput.addEventListener('input', applyFiltersAndRender);
   langFilter.addEventListener('change', applyFiltersAndRender);
   sortSelect.addEventListener('change', applyFiltersAndRender);
 
-  loadProfile();
   loadRepos();
 })();
 </script>
